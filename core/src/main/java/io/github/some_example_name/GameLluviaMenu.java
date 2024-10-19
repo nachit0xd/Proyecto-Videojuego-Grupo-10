@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+//Clase principal del juego
 	public class GameLluviaMenu extends Game {
 
 		private SpriteBatch batch;
