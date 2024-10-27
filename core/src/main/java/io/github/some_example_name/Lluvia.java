@@ -16,14 +16,18 @@ public class Lluvia {
     private long lastDropTime;
     private Texture gotaBuena;
     private Texture gotaMala;
+    private Texture gotaValiosa;
     private Sound dropSound;
+    private Sound dropValiosaSound;
     private Music rainMusic;
 
-	public Lluvia(Texture gotaBuena, Texture gotaMala, Sound ss, Music mm) {
+	public Lluvia(Texture gotaBuena, Texture gotaMala, Texture gotaValiosa, Sound ss, Sound dropValiosaSound, Music mm) {
 		rainMusic = mm;
 		dropSound = ss;
-		this.gotaBuena = gotaBuena;
+        this.dropValiosaSound = dropValiosaSound;
+        this.gotaBuena = gotaBuena;
 		this.gotaMala = gotaMala;
+        this.gotaValiosa = gotaValiosa;
 	}
 
 	public void crear() {
@@ -43,10 +47,14 @@ public class Lluvia {
 	      raindrop.height = 64;
 	      rainDropsPos.add(raindrop);
 	      // ver el tipo de gota
-	      if (MathUtils.random(1,10)<5)
-	         rainDropsType.add(1);
-	      else
-	    	 rainDropsType.add(2);
+          int tipoGota = MathUtils.random(1, 100);
+          if (tipoGota < 5) {
+              rainDropsType.add(3); // gota valiosa (5% de probabilidad)
+          } else if (tipoGota < 50) {
+              rainDropsType.add(1); // gota dañina (45% de probabilidad)
+          } else {
+              rainDropsType.add(2); // gota buena (50% de probabilidad)
+          }
 	      lastDropTime = TimeUtils.nanoTime();
 	   }
 
@@ -71,12 +79,17 @@ public class Lluvia {
 	    		 return false; // si se queda sin vidas retorna falso /game over
 	    	  rainDropsPos.removeIndex(i);
 	          rainDropsType.removeIndex(i);
-	      	}else { // gota a recolectar
+	      	} else if (rainDropsType.get(i) == 2){ // gota buena
 	    	  tarro.sumarPuntos(10);
 	          dropSound.play();
 	          rainDropsPos.removeIndex(i);
 	          rainDropsType.removeIndex(i);
-	      	}
+	      	} else if (rainDropsType.get(i) == 3){ // gota valiosa
+                tarro.sumarPuntos(50);
+                dropValiosaSound.play();
+                rainDropsPos.removeIndex(i);
+                rainDropsType.removeIndex(i);
+            }
 	      }
 	   }
 	  return true;
@@ -88,8 +101,10 @@ public class Lluvia {
 		  Rectangle raindrop = rainDropsPos.get(i);
 		  if(rainDropsType.get(i)==1) // gota dañina
 	         batch.draw(gotaMala, raindrop.x, raindrop.y);
-		  else
-			 batch.draw(gotaBuena, raindrop.x, raindrop.y);
+          else if (rainDropsType.get(i) == 2) // gota buena
+              batch.draw(gotaBuena, raindrop.x, raindrop.y);
+          else if (rainDropsType.get(i) == 3) // gota valiosa
+              batch.draw(gotaValiosa, raindrop.x, raindrop.y);
 	   }
    }
    public void destruir() {

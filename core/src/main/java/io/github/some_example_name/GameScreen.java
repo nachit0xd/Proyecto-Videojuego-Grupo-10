@@ -17,6 +17,7 @@ public class GameScreen implements Screen {
 	private BitmapFont font;
 	private Tarro tarro;
 	private Lluvia lluvia;
+    private Texture background;
 
 
 	//boolean activo = true;
@@ -32,11 +33,13 @@ public class GameScreen implements Screen {
 	      // load the drop sound effect and the rain background "music"
          Texture gota = new Texture(Gdx.files.internal("drop.png"));
          Texture gotaMala = new Texture(Gdx.files.internal("dropBad.png"));
+         Texture gotaValiosa = new Texture(Gdx.files.internal("dropGolden.png"));
 
          Sound dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
+         Sound dropValiosaSound = Gdx.audio.newSound(Gdx.files.internal("golden.ogg"));
 
 	     Music rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
-         lluvia = new Lluvia(gota, gotaMala, dropSound, rainMusic);
+         lluvia = new Lluvia(gota, gotaMala, gotaValiosa, dropSound, dropValiosaSound, rainMusic);
 
 	      // camera
 	      camera = new OrthographicCamera();
@@ -47,6 +50,7 @@ public class GameScreen implements Screen {
 
 	      // creacion de la lluvia
 	      lluvia.crear();
+        this.background = new Texture(Gdx.files.internal("background2.png"));
 	}
 
 	@Override
@@ -58,6 +62,7 @@ public class GameScreen implements Screen {
 		//actualizar
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
+        batch.draw(background, 0, 0, camera.viewportWidth, camera.viewportHeight);
 		//dibujar textos
 		font.draw(batch, "Gotas totales: " + tarro.getPuntos(), 5, 475);
 		font.draw(batch, "Vidas : " + tarro.getVidas(), 670, 475);
@@ -113,6 +118,7 @@ public class GameScreen implements Screen {
 	public void dispose() {
       tarro.destruir();
       lluvia.destruir();
+      background.dispose();
 
 	}
 
