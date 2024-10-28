@@ -18,6 +18,7 @@ public class GameScreen implements Screen {
 	private Tarro tarro;
 	private Lluvia lluvia;
     private Texture background;
+    private Texture circuloEscudo;
 
 
 	//boolean activo = true;
@@ -34,12 +35,14 @@ public class GameScreen implements Screen {
          Texture gota = new Texture(Gdx.files.internal("drop.png"));
          Texture gotaMala = new Texture(Gdx.files.internal("dropBad.png"));
          Texture gotaValiosa = new Texture(Gdx.files.internal("dropGolden.png"));
+         Texture poderEscudo = new Texture(Gdx.files.internal("shield.png"));
+         circuloEscudo = new Texture(Gdx.files.internal("circleShield.png"));
 
          Sound dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
          Sound dropValiosaSound = Gdx.audio.newSound(Gdx.files.internal("golden.ogg"));
 
 	     Music rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
-         lluvia = new Lluvia(gota, gotaMala, gotaValiosa, dropSound, dropValiosaSound, rainMusic);
+         lluvia = new Lluvia(gota, gotaMala, gotaValiosa, poderEscudo, dropSound, dropValiosaSound, rainMusic);
 
 	      // camera
 	      camera = new OrthographicCamera();
@@ -85,6 +88,11 @@ public class GameScreen implements Screen {
 		tarro.dibujar(batch);
 		lluvia.actualizarDibujoLluvia(batch);
 
+        if (tarro.isEscudoActivo()) {
+            float circleSize = 120; // Tamaño del círculo (ajústalo según sea necesario)
+            batch.draw(circuloEscudo, tarro.getArea().x - (circleSize - tarro.getArea().width) / 2, tarro.getArea().y - (circleSize - tarro.getArea().height) / 2, circleSize, circleSize);
+        }
+
 		batch.end();
 	}
 
@@ -119,7 +127,7 @@ public class GameScreen implements Screen {
       tarro.destruir();
       lluvia.destruir();
       background.dispose();
-
+      circuloEscudo.dispose();
 	}
 
 }

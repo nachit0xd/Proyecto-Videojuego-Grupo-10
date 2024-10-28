@@ -19,6 +19,8 @@ public class Tarro {
 	   private boolean herido = false;
 	   private int tiempoHeridoMax=50;
 	   private int tiempoHerido;
+       private boolean escudoActivo = false;
+       private float tiempoEscudoRestante = 0;
 
 
 	   public Tarro(Texture tex, Sound ss) {
@@ -49,10 +51,12 @@ public class Tarro {
 		      bucket.height = 64;
 	   }
 	   public void dañar() {
-		  vidas--;
-		  herido = true;
-		  tiempoHerido=tiempoHeridoMax;
-		  sonidoHerido.play();
+           if (!escudoActivo){
+               vidas--;
+               herido = true;
+               tiempoHerido=tiempoHeridoMax;
+               sonidoHerido.play();
+           }
 	   }
 	   public void dibujar(SpriteBatch batch) {
 		 if (!herido)
@@ -67,7 +71,14 @@ public class Tarro {
 
 
 	   public void actualizarMovimiento() {
-		   // movimiento desde mouse/touch
+           // Actualizar el tiempo del escudo
+           if (escudoActivo) {
+               tiempoEscudoRestante -= Gdx.graphics.getDeltaTime();
+               if (tiempoEscudoRestante <= 0) {
+                   escudoActivo = false;
+               }
+           }
+           // movimiento desde mouse/touch
 		   /*if(Gdx.input.isTouched()) {
 			      Vector3 touchPos = new Vector3();
 			      touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
@@ -81,6 +92,15 @@ public class Tarro {
 		   if(bucket.x < 0) bucket.x = 0;
 		   if(bucket.x > 800 - 64) bucket.x = 800 - 64;
 	   }
+
+    public void activarEscudo(float duracion) {
+        escudoActivo = true;
+        tiempoEscudoRestante = duracion;
+    }
+
+    public boolean isEscudoActivo() {
+        return escudoActivo;
+    }
 
 
 	public void destruir() {
