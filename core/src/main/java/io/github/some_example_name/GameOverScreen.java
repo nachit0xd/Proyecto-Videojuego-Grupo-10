@@ -3,7 +3,9 @@ package io.github.some_example_name;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
@@ -12,11 +14,13 @@ public class GameOverScreen implements Screen {
 	private SpriteBatch batch;
 	private BitmapFont font;
 	private OrthographicCamera camera;
+    private Texture background;
 
 	public GameOverScreen(final GameLluviaMenu game) {
 		this.game = game;
         this.batch = game.getBatch();
         this.font = game.getFont();
+        this.background = new Texture(Gdx.files.internal("background.png"));
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, 800, 480);
 	}
@@ -28,8 +32,17 @@ public class GameOverScreen implements Screen {
 		batch.setProjectionMatrix(camera.combined);
 
 		batch.begin();
-		font.draw(batch, "GAME OVER ", 100, 200);
-		font.draw(batch, "Toca en cualquier lado para reiniciar.", 100, 100);
+        batch.draw(background, 0, 0, camera.viewportWidth, camera.viewportHeight);
+        font.getData().setScale(2, 2);
+
+        GlyphLayout layout = new GlyphLayout();
+        layout.setText(font, "GAME OVER");
+        float textWidth = layout.width;
+        font.draw(batch, layout, (camera.viewportWidth - textWidth) / 2, camera.viewportHeight / 2 + 50);
+
+        layout.setText(font, "¡Toca en cualquier lugar para reiniciar!");
+        textWidth = layout.width;
+        font.draw(batch, layout, (camera.viewportWidth - textWidth) / 2, camera.viewportHeight / 2 - 50);
 		batch.end();
 
 		if (Gdx.input.isTouched()) {
@@ -71,7 +84,7 @@ public class GameOverScreen implements Screen {
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
-
+        background.dispose();
 	}
 
 }
