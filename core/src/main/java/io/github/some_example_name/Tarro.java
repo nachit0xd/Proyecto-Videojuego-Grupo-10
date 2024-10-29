@@ -93,6 +93,7 @@ public class Tarro {
 		   if(bucket.x > 800 - 64) bucket.x = 800 - 64;
 	   }
 
+    //Métodos relacionados a poderes
     public void activarEscudo(float duracion) {
         escudoActivo = true;
         tiempoEscudoRestante = duracion;
@@ -102,6 +103,9 @@ public class Tarro {
         return escudoActivo;
     }
 
+    public void incrementarVida(int cantidad) {
+        vidas += cantidad;
+    }
 
 	public void destruir() {
 		    bucketImage.dispose();

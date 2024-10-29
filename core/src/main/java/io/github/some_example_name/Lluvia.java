@@ -16,18 +16,22 @@ public class Lluvia {
     private Texture gotaMala;
     private Texture gotaValiosa;
     private Texture poderEscudo;
+    private Texture poderVidaExtra;
     private Sound dropSound;
     private Sound dropValiosaSound;
+    private Sound powerUpSound;
     private Music rainMusic;
 
-	public Lluvia(Texture gotaBuena, Texture gotaMala, Texture gotaValiosa, Texture poderEscudo, Sound ss, Sound dropValiosaSound, Music mm) {
+	public Lluvia(Texture gotaBuena, Texture gotaMala, Texture gotaValiosa, Texture poderEscudo, Texture poderVidaExtra, Sound ss, Sound dropValiosaSound, Sound powerUpSound, Music mm) {
 		rainMusic = mm;
 		dropSound = ss;
         this.dropValiosaSound = dropValiosaSound;
+        this.powerUpSound = powerUpSound;
         this.gotaBuena = gotaBuena;
 		this.gotaMala = gotaMala;
         this.gotaValiosa = gotaValiosa;
         this.poderEscudo = poderEscudo;
+        this.poderVidaExtra = poderVidaExtra;
 	}
 
 	public void crear() {
@@ -40,21 +44,25 @@ public class Lluvia {
 
 	private void crearEntidadCaida() {
         EntidadCaida entidad;
-        int tipoEntidad = MathUtils.random(1, 100);
+        int tipoEntidad = MathUtils.random(1, 1000);
         //Probabilidades de entidades
-        if (tipoEntidad <= 4) {
+        if (tipoEntidad <= 40) {
             entidad = new GotaValiosa(gotaValiosa); // 4% de probabilidad
-        } else if (tipoEntidad <= 64) {
+        } else if (tipoEntidad <= 640) {
             entidad = new GotaBuena(gotaBuena); // 60% de probabilidad
-        } else if (tipoEntidad <= 99) {
+        } else if (tipoEntidad <= 990) {
             entidad = new GotaMala(gotaMala); // 35% de probabilidad
+        } else if (tipoEntidad <= 995){
+            entidad = new PoderEscudo(poderEscudo); // Poder escudo (0.5% de probabilidad)
         } else {
-            entidad = new PoderEscudo(poderEscudo); // Poder escudo (1% de probabilidad)
+            entidad = new PoderVidaExtra(poderVidaExtra); // Poder vida extra (0.5% de probabilidad)
         }
         entidad.setPosition(MathUtils.random(0, 800 - 64), 480);
         entidadesCaidas.add(entidad);
         lastDropTime = TimeUtils.nanoTime();
 	   }
+
+
 
    public boolean actualizarMovimiento(Tarro tarro) {
        if (TimeUtils.nanoTime() - lastDropTime > 100000000) crearEntidadCaida();
@@ -71,6 +79,8 @@ public class Lluvia {
                    dropSound.play();
                } else if (entidad instanceof GotaValiosa) {
                    dropValiosaSound.play();
+               } else if (entidad instanceof Poder) {
+                   powerUpSound.play();
                }
                entidadesCaidas.removeIndex(i);
                if (tarro.getVidas() <= 0) return false;

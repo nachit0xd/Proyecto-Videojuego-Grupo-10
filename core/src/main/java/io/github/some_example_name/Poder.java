@@ -11,8 +11,8 @@ public abstract class Poder implements EntidadCaida{
     public Poder(Texture textura) {
         this.textura = textura;
         posicion = new Rectangle();
-        this.posicion.width = 64;
-        this.posicion.height = 64;
+        this.posicion.width = 48;
+        this.posicion.height = 48;
     }
     @Override
     public void setPosition(float x, float y) {
