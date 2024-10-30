@@ -35,6 +35,7 @@ public class GameScreen implements Screen {
          Texture gota = new Texture(Gdx.files.internal("drop.png"));
          Texture gotaMala = new Texture(Gdx.files.internal("dropBad.png"));
          Texture gotaValiosa = new Texture(Gdx.files.internal("dropGolden.png"));
+         Texture gotaMortal = new Texture(Gdx.files.internal("dropDeath.png"));
          Texture poderEscudo = new Texture(Gdx.files.internal("shield.png"));
          Texture poderVidaExtra = new Texture(Gdx.files.internal("life.png"));
          circuloEscudo = new Texture(Gdx.files.internal("circleShield.png"));
@@ -44,7 +45,7 @@ public class GameScreen implements Screen {
          Sound powerUpSound = Gdx.audio.newSound(Gdx.files.internal("powerUp.ogg"));
 
 	     Music rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
-         lluvia = new Lluvia(gota, gotaMala, gotaValiosa, poderEscudo, poderVidaExtra, dropSound, dropValiosaSound, powerUpSound, rainMusic);
+         lluvia = new Lluvia(gota, gotaMala, gotaValiosa, gotaMortal, poderEscudo, poderVidaExtra, dropSound, dropValiosaSound, powerUpSound, rainMusic);
 
 	      // camera
 	      camera = new OrthographicCamera();
@@ -93,6 +94,16 @@ public class GameScreen implements Screen {
         if (tarro.isEscudoActivo()) {
             float circleSize = 120; // Tamaño del círculo (ajústalo según sea necesario)
             batch.draw(circuloEscudo, tarro.getArea().x - (circleSize - tarro.getArea().width) / 2, tarro.getArea().y - (circleSize - tarro.getArea().height) / 2, circleSize, circleSize);
+        }
+
+        // Mostrar alerta si es necesario
+        if (lluvia.isMostrarAlerta()) {
+            String mensajeAlerta = "¡Cuidado con las gotas mortales!";
+            float textoAncho = font.getRegion().getRegionWidth();
+            float textoAlto = font.getRegion().getRegionHeight();
+            float x = (camera.viewportWidth - textoAncho) / 2;
+            float y = (camera.viewportHeight + textoAlto) / 2;
+            font.draw(batch, mensajeAlerta, x, y);
         }
 
 		batch.end();

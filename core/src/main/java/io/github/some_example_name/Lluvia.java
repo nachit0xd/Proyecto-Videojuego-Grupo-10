@@ -12,17 +12,27 @@ import com.badlogic.gdx.utils.TimeUtils;
 public class Lluvia {
 	private Array<EntidadCaida> entidadesCaidas;
     private long lastDropTime;
+    //Texturas de las gotas
     private Texture gotaBuena;
     private Texture gotaMala;
     private Texture gotaValiosa;
+    private Texture gotaMortal;
+    //Texturas de los poderes
     private Texture poderEscudo;
     private Texture poderVidaExtra;
+    //Sonidos
     private Sound dropSound;
     private Sound dropValiosaSound;
     private Sound powerUpSound;
     private Music rainMusic;
+    //Variables para alertas
+    private long startTime;
+    private boolean mostrarAlerta = false;
+    private long tiempoInicioAlerta;
+    private static final long DURACION_ALERTA = 5_000_000_000L;
 
-	public Lluvia(Texture gotaBuena, Texture gotaMala, Texture gotaValiosa, Texture poderEscudo, Texture poderVidaExtra, Sound ss, Sound dropValiosaSound, Sound powerUpSound, Music mm) {
+    //Constructor
+	public Lluvia(Texture gotaBuena, Texture gotaMala, Texture gotaValiosa, Texture gotaMortal, Texture poderEscudo, Texture poderVidaExtra, Sound ss, Sound dropValiosaSound, Sound powerUpSound, Music mm) {
 		rainMusic = mm;
 		dropSound = ss;
         this.dropValiosaSound = dropValiosaSound;
@@ -30,21 +40,27 @@ public class Lluvia {
         this.gotaBuena = gotaBuena;
 		this.gotaMala = gotaMala;
         this.gotaValiosa = gotaValiosa;
+        this.gotaMortal = gotaMortal;
         this.poderEscudo = poderEscudo;
         this.poderVidaExtra = poderVidaExtra;
+        this.startTime = TimeUtils.nanoTime();
 	}
 
+    //Métodos
+    //Crea una nueva entidad caída
 	public void crear() {
         entidadesCaidas = new Array<>();
 		crearEntidadCaida();
-	      // start the playback of the background music immediately
-	      rainMusic.setLooping(true);
-	      rainMusic.play();
+        // start the playback of the background music immediately
+        rainMusic.setLooping(true);
+        rainMusic.play();
 	}
 
+    //Crea una nueva entidad caída
 	private void crearEntidadCaida() {
         EntidadCaida entidad;
         int tipoEntidad = MathUtils.random(1, 1000);
+        long elapsedTime = TimeUtils.timeSinceNanos(startTime);
         //Probabilidades de entidades
         if (tipoEntidad <= 40) {
             entidad = new GotaValiosa(gotaValiosa); // 4% de probabilidad
@@ -57,13 +73,24 @@ public class Lluvia {
         } else {
             entidad = new PoderVidaExtra(poderVidaExtra); // Poder vida extra (0.5% de probabilidad)
         }
+
+        // Solo generar GotaMortal después de 30 segundos
+        if (elapsedTime > 30_000_000_000L) {
+            if (!mostrarAlerta) {
+                mostrarAlerta = true;
+                tiempoInicioAlerta = TimeUtils.nanoTime();
+            }
+            if (tipoEntidad > 995) {
+                entidad = new GotaMortal(gotaMortal); // Gota mortal (0.1% de probabilidad)
+            }
+        }
+
         entidad.setPosition(MathUtils.random(0, 800 - 64), 480);
         entidadesCaidas.add(entidad);
         lastDropTime = TimeUtils.nanoTime();
 	   }
 
-
-
+   //Actualiza el movimiento de las entidades caídas
    public boolean actualizarMovimiento(Tarro tarro) {
        if (TimeUtils.nanoTime() - lastDropTime > 100000000) crearEntidadCaida();
 
@@ -89,6 +116,12 @@ public class Lluvia {
        return true;
    }
 
+   //Métodos de alertas
+    public boolean isMostrarAlerta() {
+        return mostrarAlerta && TimeUtils.timeSinceNanos(tiempoInicioAlerta) < DURACION_ALERTA;
+    }
+
+   //Actualiza el dibujo de las entidades caídas
    public void actualizarDibujoLluvia(SpriteBatch batch) {
          for (EntidadCaida entidad : entidadesCaidas) {
               entidad.dibujar(batch);
