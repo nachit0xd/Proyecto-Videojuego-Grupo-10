@@ -1,58 +1,37 @@
 package io.github.some_example_name;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 
-public class MainMenuScreen implements Screen {
+public class MainMenuScreen extends BaseScreen {
 
-	final GameLluviaMenu game;
-	private SpriteBatch batch;
-	private BitmapFont font;
-	private OrthographicCamera camera;
     private Texture background;
 
-	public MainMenuScreen(final GameLluviaMenu game) {
-		this.game = game;
-        this.batch = game.getBatch();
-        this.font = game.getFont();
+    public MainMenuScreen(final GameLluviaMenu game) {
+        super(game);
         this.background = new Texture(Gdx.files.internal("background.png"));
-		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 800, 480);
-	}
+    }
 
 	@Override
-	public void render(float delta) {
-		ScreenUtils.clear(0, 0, 0.2f, 1);
-
-		camera.update();
-		batch.setProjectionMatrix(camera.combined);
-
-		batch.begin();
+	public void renderScreen(float delta) {
         batch.draw(background, 0, 0, camera.viewportWidth, camera.viewportHeight);
-		font.getData().setScale(2, 2);
+        game.getFont().getData().setScale(2, 2);
 
-		GlyphLayout layout = new GlyphLayout();
-        layout.setText(font, "¡Bienvenido a Recolecta las Gotas!");
+        GlyphLayout layout = new GlyphLayout();
+        layout.setText(game.getFont(), "¡Bienvenido a Recolecta las Gotas!");
         float textWidth = layout.width;
-        font.draw(batch, layout, (camera.viewportWidth - textWidth) / 2, camera.viewportHeight / 2 + 50);
+        game.getFont().draw(batch, layout, (camera.viewportWidth - textWidth) / 2, camera.viewportHeight / 2 + 50);
 
-        layout.setText(font, "¡Toca en cualquier lugar para comenzar!");
+        layout.setText(game.getFont(), "¡Toca en cualquier lugar para comenzar!");
         textWidth = layout.width;
-        font.draw(batch, layout, (camera.viewportWidth - textWidth) / 2, camera.viewportHeight / 2 - 50);
+        game.getFont().draw(batch, layout, (camera.viewportWidth - textWidth) / 2, camera.viewportHeight / 2 - 50);
 
-		batch.end();
-
-		if (Gdx.input.isTouched()) {
-			game.setScreen(new GameScreen(game));
-			dispose();
-		}
+        if (Gdx.input.isTouched()) {
+            game.setScreen(new GameScreen(game));
+            dispose();
+        }
 	}
 
 	@Override
@@ -88,6 +67,7 @@ public class MainMenuScreen implements Screen {
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
+        super.dispose();
         background.dispose();
 	}
 
