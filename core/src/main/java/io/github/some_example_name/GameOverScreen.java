@@ -17,7 +17,7 @@ public class GameOverScreen implements Screen {
     private Texture background;
 
 	public GameOverScreen(final GameLluviaMenu game) {
-		this.game = game;
+		this.game = GameLluviaMenu.getInstance();
         this.batch = game.getBatch();
         this.font = game.getFont();
         this.background = new Texture(Gdx.files.internal("background.png"));

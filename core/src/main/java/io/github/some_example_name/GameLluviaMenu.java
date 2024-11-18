@@ -7,9 +7,21 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 //Clase principal del juego
 	public class GameLluviaMenu extends Game {
 
+        private static GameLluviaMenu instance;
+
 		private SpriteBatch batch;
 		private BitmapFont font;
 		private int higherScore;
+
+        private GameLluviaMenu() {
+        }
+
+        public static GameLluviaMenu getInstance() {
+            if (instance == null) {
+                instance = new GameLluviaMenu();
+            }
+            return instance;
+        }
 
 		public void create() {
 			batch = new SpriteBatch();
