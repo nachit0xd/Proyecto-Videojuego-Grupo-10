@@ -1,7 +1,9 @@
 package io.github.some_example_name;
 
 public class GotaMalaStrategy implements GotaStrategy {
+    @Override
     public void aplicarEfecto(Tarro tarro) {
-        tarro.perderVida(); // Reduce la vida del jugador
+        tarro.dañar(); // Resta una vida
     }
 }
+
