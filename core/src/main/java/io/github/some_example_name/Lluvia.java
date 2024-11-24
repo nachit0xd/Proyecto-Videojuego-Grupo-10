@@ -10,132 +10,153 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 
 public class Lluvia {
-	private Array<EntidadCaida> entidadesCaidas;
+    private Array<EntidadCaida> entidadesCaidas;
     private long lastDropTime;
-    //Texturas de las gotas
+    // Texturas de las gotas
     private Texture gotaBuena;
     private Texture gotaMala;
     private Texture gotaValiosa;
     private Texture gotaMortal;
-    //Texturas de los poderes
+    // Texturas de los poderes
     private Texture poderEscudo;
     private Texture poderVidaExtra;
-    //Sonidos
+    // Sonidos
     private Sound dropSound;
     private Sound dropValiosaSound;
     private Sound powerUpSound;
     private Music rainMusic;
-    //Variables para alertas
+    // Variables para alertas
     private long startTime;
     private boolean mostrarAlerta = false;
     private long tiempoInicioAlerta;
     private static final long DURACION_ALERTA = 5_000_000_000L;
 
-    //Constructor
-	public Lluvia(Texture gotaBuena, Texture gotaMala, Texture gotaValiosa, Texture gotaMortal, Texture poderEscudo, Texture poderVidaExtra, Sound ss, Sound dropValiosaSound, Sound powerUpSound, Music mm) {
-		rainMusic = mm;
-		dropSound = ss;
+    // Constructor
+    public Lluvia(Texture gotaBuena, Texture gotaMala, Texture gotaValiosa, Texture gotaMortal,
+                  Texture poderEscudo, Texture poderVidaExtra, Sound ss, Sound dropValiosaSound,
+                  Sound powerUpSound, Music mm) {
+        rainMusic = mm;
+        dropSound = ss;
         this.dropValiosaSound = dropValiosaSound;
         this.powerUpSound = powerUpSound;
         this.gotaBuena = gotaBuena;
-		this.gotaMala = gotaMala;
+        this.gotaMala = gotaMala;
         this.gotaValiosa = gotaValiosa;
         this.gotaMortal = gotaMortal;
         this.poderEscudo = poderEscudo;
         this.poderVidaExtra = poderVidaExtra;
         this.startTime = TimeUtils.nanoTime();
-	}
+    }
 
-    //Métodos
-    //Crea una nueva entidad caída
-	public void crear() {
+    // Inicializa la lluvia
+    public void crear() {
         entidadesCaidas = new Array<>();
-		crearEntidadCaida();
-        // start the playback of the background music immediately
+        crearEntidadCaida();
         rainMusic.setLooping(true);
         rainMusic.play();
-	}
+    }
 
-    //Crea una nueva entidad caída
-	private void crearEntidadCaida() {
-        EntidadCaida entidad;
+    // Genera una nueva entidad caída con estrategias
+    private void crearEntidadCaida() {
+        float x = MathUtils.random(0, 800 - 64); // Posición aleatoria en el eje X
+        float y = 480; // Altura inicial
+
+        GotaStrategy estrategia;
+        Texture textura;
+
         int tipoEntidad = MathUtils.random(1, 1000);
         long elapsedTime = TimeUtils.timeSinceNanos(startTime);
-        //Probabilidades de entidades
-        if (tipoEntidad <= 40) {
-            entidad = new GotaValiosa(gotaValiosa); // 4% de probabilidad
-        } else if (tipoEntidad <= 640) {
-            entidad = new GotaBuena(gotaBuena); // 60% de probabilidad
-        } else if (tipoEntidad <= 990) {
-            entidad = new GotaMala(gotaMala); // 35% de probabilidad
-        } else if (tipoEntidad <= 995){
-            entidad = new PoderEscudo(poderEscudo); // Poder escudo (0.5% de probabilidad)
-        } else {
-            entidad = new PoderVidaExtra(poderVidaExtra); // Poder vida extra (0.5% de probabilidad)
+
+        if (tipoEntidad <= 40) { // 4% de probabilidad
+            estrategia = new GotaValiosaStrategy();
+            textura = gotaValiosa;
+        } else if (tipoEntidad <= 640) { // 60% de probabilidad
+            estrategia = new GotaBuenaStrategy(dropSound);
+            textura = gotaBuena;
+        } else if (tipoEntidad <= 990) { // 35% de probabilidad
+            estrategia = new GotaMalaStrategy();
+            textura = gotaMala;
+        } else if (tipoEntidad <= 995) { // 0.5% de probabilidad
+            estrategia = new PoderEscudoStrategy();
+            textura = poderEscudo;
+        } else { // 0.5% de probabilidad
+            estrategia = new PoderVidaExtraStrategy();
+            textura = poderVidaExtra;
         }
 
-        // Solo generar GotaMortal después de 30 segundos
+        // Generar gotas mortales después de 30 segundos
         if (elapsedTime > 30_000_000_000L) {
             if (!mostrarAlerta) {
                 mostrarAlerta = true;
                 tiempoInicioAlerta = TimeUtils.nanoTime();
             }
             if (tipoEntidad > 995) {
-                entidad = new GotaMortal(gotaMortal); // Gota mortal (0.1% de probabilidad)
+                estrategia = new GotaMortalStrategy();
+                textura = gotaMortal;
             }
         }
 
-        entidad.setPosition(MathUtils.random(0, 800 - 64), 480);
+        // Crear entidad genérica con estrategia asignada
+        GotaImpl entidad = new GotaImpl(x, y, estrategia, textura);
         entidadesCaidas.add(entidad);
+
         lastDropTime = TimeUtils.nanoTime();
-	   }
+    }
 
-   //Actualiza el movimiento de las entidades caídas
-   public boolean actualizarMovimiento(Tarro tarro) {
-       if (TimeUtils.nanoTime() - lastDropTime > 100000000) crearEntidadCaida();
+    // Actualiza el movimiento y colisiones de las entidades caídas
+    public boolean actualizarMovimiento(Tarro tarro) {
+        if (TimeUtils.nanoTime() - lastDropTime > 100000000L) {
+            crearEntidadCaida(); // Genera nuevas gotas cada 0.1 segundos
+        }
 
-       for (int i = 0; i < entidadesCaidas.size; i++) {
-           EntidadCaida entidad = entidadesCaidas.get(i);
-           entidad.getPosicion().y -= (entidad instanceof Poder ? 150 : 300) * Gdx.graphics.getDeltaTime();
-           if (entidad.getPosicion().y + 64 < 0) {
-               entidadesCaidas.removeIndex(i);
-           }
-           if (entidad.getPosicion().overlaps(tarro.getArea())) {
-               entidad.efecto(tarro);
-               if (entidad instanceof GotaBuena) {
-                   dropSound.play();
-               } else if (entidad instanceof GotaValiosa) {
-                   dropValiosaSound.play();
-               } else if (entidad instanceof Poder) {
-                   powerUpSound.play();
-               }
-               entidadesCaidas.removeIndex(i);
-               if (tarro.getVidas() <= 0) return false;
-           }
-       }
-       return true;
-   }
+        for (int i = 0; i < entidadesCaidas.size; i++) {
+            EntidadCaida entidad = entidadesCaidas.get(i);
+            entidad.setPosition(entidad.getPosicion().x, entidad.getPosicion().y - 300 * Gdx.graphics.getDeltaTime());
 
-   //Métodos de alertas
+            // Elimina las gotas fuera de la pantalla
+            if (entidad.getPosicion().y + 64 < 0) {
+                entidadesCaidas.removeIndex(i);
+                i--;
+                continue;
+            }
+
+            // Maneja la colisión con el tarro
+            if (entidad.getPosicion().overlaps(tarro.getArea())) {
+                entidad.efecto(tarro); // Aplica el efecto al tarro
+                entidadesCaidas.removeIndex(i);
+                i--;
+
+                // Verificar si el juego debe terminar
+                if (tarro.getVidas() <= 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // Dibuja todas las gotas
+    public void actualizarDibujoLluvia(SpriteBatch batch) {
+        for (EntidadCaida entidad : entidadesCaidas) {
+            entidad.dibujar(batch);
+        }
+    }
+
+    // Métodos auxiliares
     public boolean isMostrarAlerta() {
         return mostrarAlerta && TimeUtils.timeSinceNanos(tiempoInicioAlerta) < DURACION_ALERTA;
     }
 
-   //Actualiza el dibujo de las entidades caídas
-   public void actualizarDibujoLluvia(SpriteBatch batch) {
-         for (EntidadCaida entidad : entidadesCaidas) {
-              entidad.dibujar(batch);
-         }
-   }
-   public void destruir() {
-      dropSound.dispose();
-      rainMusic.dispose();
-   }
-   public void pausar() {
-	  rainMusic.stop();
-   }
-   public void continuar() {
-	  rainMusic.play();
-   }
+    public void destruir() {
+        dropSound.dispose();
+        rainMusic.dispose();
+    }
 
+    public void pausar() {
+        rainMusic.stop();
+    }
+
+    public void continuar() {
+        rainMusic.play();
+    }
 }
