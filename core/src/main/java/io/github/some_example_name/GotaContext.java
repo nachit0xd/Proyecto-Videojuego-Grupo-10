@@ -1,22 +1,22 @@
 package io.github.some_example_name;
 
 public class GotaContext {
-    private GotaStrategy estrategiaActual; // Atributo privado de tipo Strategy
+    private GotaStrategy estrategia; // Atributo privado de tipo Strategy
 
-    // Constructor que recibe una estrategia inicial
+    // Constructor para inicializar con una estrategia
     public GotaContext(GotaStrategy estrategia) {
-        this.estrategiaActual = estrategia;
+        this.estrategia = estrategia;
     }
 
-    // Método setter para cambiar la estrategia
-    public void setStrategy(GotaStrategy nuevaEstrategia) {
-        this.estrategiaActual = nuevaEstrategia;
+    // Cambia la estrategia en tiempo de ejecución
+    public void setEstrategia(GotaStrategy estrategia) {
+        this.estrategia = estrategia;
     }
 
-    // Método que aplica la estrategia actual
+    // Ejecuta la estrategia actual
     public void ejecutarEstrategia(Tarro tarro) {
-        if (estrategiaActual != null) {
-            estrategiaActual.aplicarEfecto(tarro);
+        if (estrategia != null) {
+            estrategia.aplicarEfecto(tarro);
         }
     }
 }
