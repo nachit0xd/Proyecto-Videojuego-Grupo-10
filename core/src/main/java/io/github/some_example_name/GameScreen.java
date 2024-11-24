@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class GameScreen extends BaseScreen {
@@ -12,20 +11,17 @@ public class GameScreen extends BaseScreen {
     private Lluvia lluvia;
     private Texture background;
     private Texture circuloEscudo;
-
-
-	//boolean activo = true;
+    private GotaContext gotaContext; // Contexto para manejar las estrategias
 
     public GameScreen(final GameLluviaMenu game) {
         super(game);
         this.background = new Texture(Gdx.files.internal("background2.png"));
         this.circuloEscudo = new Texture(Gdx.files.internal("circleShield.png"));
 
-        // load the images for the droplet and the bucket, 64x64 pixels each
+        // Cargar sonidos e imágenes
         Sound hurtSound = Gdx.audio.newSound(Gdx.files.internal("hurt.ogg"));
         tarro = new Tarro(new Texture(Gdx.files.internal("bucket.png")), hurtSound);
 
-        // load the drop sound effect and the rain background "music"
         Texture gota = new Texture(Gdx.files.internal("drop.png"));
         Texture gotaMala = new Texture(Gdx.files.internal("dropBad.png"));
         Texture gotaValiosa = new Texture(Gdx.files.internal("dropGolden.png"));
@@ -40,11 +36,14 @@ public class GameScreen extends BaseScreen {
         Music rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
         lluvia = new Lluvia(gota, gotaMala, gotaValiosa, gotaMortal, poderEscudo, poderVidaExtra, dropSound, dropValiosaSound, powerUpSound, rainMusic);
 
-        // creacion del tarro
+        // Crear el tarro
         tarro.crear();
 
-        // creacion de la lluvia
+        // Crear la lluvia
         lluvia.crear();
+
+        // Inicializar el contexto con una estrategia inicial (por ejemplo, GotaBuenaStrategy)
+        gotaContext = new GotaContext(new GotaBuenaStrategy());
     }
 
     @Override
@@ -58,6 +57,10 @@ public class GameScreen extends BaseScreen {
 
         if (!tarro.estaHerido()) {
             tarro.actualizarMovimiento();
+            
+            // Aplicar la estrategia actual
+            gotaContext.ejecutarEstrategia(tarro);
+
             if (!lluvia.actualizarMovimiento(tarro)) {
                 if (game.getHigherScore() < tarro.getPuntos())
                     game.setHigherScore(tarro.getPuntos());
@@ -84,39 +87,56 @@ public class GameScreen extends BaseScreen {
         }
     }
 
-	@Override
-	public void resize(int width, int height) {
-	}
+    public void cambiarEstrategia(String tipoEstrategia) {
+        // Cambiar la estrategia del contexto según el tipo
+        switch (tipoEstrategia) {
+            case "BUENA":
+                gotaContext.setStrategy(new GotaBuenaStrategy());
+                break;
+            case "MALA":
+                gotaContext.setStrategy(new GotaMalaStrategy());
+                break;
+            case "VALIOSA":
+                gotaContext.setStrategy(new GotaValiosaStrategy());
+                break;
+            case "MORTAL":
+                gotaContext.setStrategy(new GotaMortalStrategy());
+                break;
+            default:
+                System.out.println("Estrategia no válida");
+        }
+    }
 
-	@Override
-	public void show() {
-	  // continuar con sonido de lluvia
-	  lluvia.continuar();
-	}
+    @Override
+    public void resize(int width, int height) {
+    }
 
-	@Override
-	public void hide() {
+    @Override
+    public void show() {
+        // continuar con sonido de lluvia
+        lluvia.continuar();
+    }
 
-	}
+    @Override
+    public void hide() {
+    }
 
-	@Override
-	public void pause() {
-		lluvia.pausar();
-		game.setScreen(new PausaScreen(game, this));
-	}
+    @Override
+    public void pause() {
+        lluvia.pausar();
+        game.setScreen(new PausaScreen(game, this));
+    }
 
-	@Override
-	public void resume() {
+    @Override
+    public void resume() {
+    }
 
-	}
-
-	@Override
-	public void dispose() {
-      super.dispose();
-      tarro.destruir();
-      lluvia.destruir();
-      background.dispose();
-      circuloEscudo.dispose();
-	}
-
+    @Override
+    public void dispose() {
+        super.dispose();
+        tarro.destruir();
+        lluvia.destruir();
+        background.dispose();
+        circuloEscudo.dispose();
+    }
 }
