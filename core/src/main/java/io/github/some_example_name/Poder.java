@@ -4,16 +4,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
-public abstract class Poder implements EntidadCaida{
+public class Poder implements EntidadCaida {
     protected Rectangle posicion;
     protected Texture textura;
+    private PoderStrategy strategy; // Estrategia para definir el efecto del poder
 
-    public Poder(Texture textura) {
+    public Poder(Texture textura, PoderStrategy strategy) {
         this.textura = textura;
-        posicion = new Rectangle();
+        this.strategy = strategy;
+        this.posicion = new Rectangle();
         this.posicion.width = 48;
         this.posicion.height = 48;
     }
+
     @Override
     public void setPosition(float x, float y) {
         this.posicion.x = x;
@@ -26,7 +29,11 @@ public abstract class Poder implements EntidadCaida{
     }
 
     @Override
-    public abstract void efecto(Tarro tarro);
+    public void efecto(Tarro tarro) {
+        if (strategy != null) {
+            strategy.aplicarEfecto(tarro); // Delegar el efecto a la estrategia
+        }
+    }
 
     @Override
     public void dibujar(SpriteBatch batch) {
