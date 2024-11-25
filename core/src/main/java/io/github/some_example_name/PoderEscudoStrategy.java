@@ -1,9 +1,8 @@
 package io.github.some_example_name;
 
-public class PoderEscudoStrategy implements GotaStrategy {
-    private static final float DURACION_ESCUDO = 10f; // Duración del escudo en segundos
-
+public class PoderEscudoStrategy implements PoderStrategy {
+    @Override
     public void aplicarEfecto(Tarro tarro) {
-        tarro.activarEscudo(DURACION_ESCUDO); // Activa el escudo por la duración definida
+        tarro.activarEscudo(10); // Activa un escudo por 10 segundos
     }
 }
